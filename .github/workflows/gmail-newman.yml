@@ -61,3 +61,4 @@ jobs:
             newman/newman.log
             newman/report.json
           if-no-files-found: warn
+
