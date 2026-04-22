@@ -75,6 +75,13 @@ jobs:
             --reporters cli,json \
             --reporter-json-export newman/report.json \
             2>&1 | tee newman/newman.log
+          STATUS=${PIPESTATUS[0]}
+          echo "Newman exit code: $STATUS"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "---- Last 120 lines of newman/newman.log ----"
+            tail -n 120 newman/newman.log || true
+          fi
+          exit "$STATUS"
 
       - name: Upload Newman proof (artifact)
         if: always()
