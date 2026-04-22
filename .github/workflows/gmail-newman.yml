@@ -44,6 +44,7 @@ jobs:
         run: |
           mkdir -p newman
           set -euo pipefail
+          cp postman/Gmail_API.postman_environment.example.json postman/Gmail_API.postman_environment.json
           npx newman run postman/Gmail_API.postman_collection.json \
             -e postman/Gmail_API.postman_environment.json \
             --folder "Exercise_2" \
