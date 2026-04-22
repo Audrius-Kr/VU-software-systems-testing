@@ -1,6 +1,6 @@
 # Scheduled Gmail API regression (Exercise 2) via Newman.
 # Cron is UTC: 08:00 daily — document this for coursework proof.
-# Secrets: GCP_OAUTH_CLIENT_ID, GCP_OAUTH_CLIENT_SECRET, GMAIL_REFRESH_TOKEN
+# Secrets: GCP_OAUTH_CLIENT_ID, GCP_OAUTH_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_FROM_EMAIL
 name: Gmail API Newman
 
 on:
@@ -41,10 +41,31 @@ jobs:
           echo "ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
       - name: Run Newman (Exercise_2 only)
+        env:
+          GMAIL_FROM_EMAIL: ${{ secrets.GMAIL_FROM_EMAIL }}
+          GMAIL_TO_EMAIL: ${{ secrets.GMAIL_TO_EMAIL }}
         run: |
           mkdir -p newman
           set -euo pipefail
-          cp postman/Gmail_API.postman_environment.example.json postman/Gmail_API.postman_environment.json
+          : "${GMAIL_FROM_EMAIL:?Missing required secret GMAIL_FROM_EMAIL}"
+          TO_EMAIL="${GMAIL_TO_EMAIL:-$GMAIL_FROM_EMAIL}"
+          cat > postman/Gmail_API.postman_environment.json <<EOF
+          {
+            "id": "gmail-api-env-ci",
+            "name": "Gmail API (CI)",
+            "values": [
+              { "key": "access_token", "value": "", "type": "secret", "enabled": true },
+              { "key": "from_email", "value": "$GMAIL_FROM_EMAIL", "type": "default", "enabled": true },
+              { "key": "to_email", "value": "$TO_EMAIL", "type": "default", "enabled": true },
+              { "key": "encoded_raw", "value": "", "type": "default", "enabled": true },
+              { "key": "message_id", "value": "", "type": "default", "enabled": true },
+              { "key": "label_id", "value": "", "type": "default", "enabled": true }
+            ],
+            "_postman_variable_scope": "environment",
+            "_postman_exported_at": "2026-04-22T00:00:00.000Z",
+            "_postman_exported_using": "GitHub Actions"
+          }
+          EOF
           npx newman run postman/Gmail_API.postman_collection.json \
             -e postman/Gmail_API.postman_environment.json \
             --folder "Exercise_2" \
