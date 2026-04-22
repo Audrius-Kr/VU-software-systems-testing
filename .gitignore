@@ -1,0 +1,7 @@
+node_modules/
+newman/
+*.log
+.DS_Store
+postman/*local*.json
+.env
+.env.*

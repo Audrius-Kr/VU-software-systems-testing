@@ -1,0 +1,62 @@
+# Scheduled Gmail API regression (Exercise 2) via Newman.
+# Cron is UTC: 08:00 daily — document this for coursework proof.
+# Secrets: GCP_OAUTH_CLIENT_ID, GCP_OAUTH_CLIENT_SECRET, GMAIL_REFRESH_TOKEN
+name: Gmail API Newman
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Mint access token from refresh token
+        id: token
+        env:
+          GCP_OAUTH_CLIENT_ID: ${{ secrets.GCP_OAUTH_CLIENT_ID }}
+          GCP_OAUTH_CLIENT_SECRET: ${{ secrets.GCP_OAUTH_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        run: |
+          set -e
+          TOKEN="$(node scripts/get-access-token.mjs)"
+          echo "::add-mask::$TOKEN"
+          echo "ACCESS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Run Newman (Exercise_2 only)
+        run: |
+          mkdir -p newman
+          set -euo pipefail
+          npx newman run postman/Gmail_API.postman_collection.json \
+            -e postman/Gmail_API.postman_environment.json \
+            --folder "Exercise_2" \
+            --env-var "access_token=$ACCESS_TOKEN" \
+            --reporters cli,json \
+            --reporter-json-export newman/report.json \
+            2>&1 | tee newman/newman.log
+
+      - name: Upload Newman proof (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-gmail-proof
+          path: |
+            newman/newman.log
+            newman/report.json
+          if-no-files-found: warn
