@@ -45,9 +45,12 @@ jobs:
           GMAIL_FROM_EMAIL: ${{ secrets.GMAIL_FROM_EMAIL }}
           GMAIL_TO_EMAIL: ${{ secrets.GMAIL_TO_EMAIL }}
         run: |
+          set -Eeuo pipefail
+          trap 'echo "Failure at line $LINENO: $BASH_COMMAND"; echo "PWD: $(pwd)"; ls -la; ls -la postman || true' ERR
+          pwd
+          ls -la
           mkdir -p newman
           mkdir -p postman
-          set -euo pipefail
           test -f postman/Gmail_API.postman_collection.json
           : "${GMAIL_FROM_EMAIL:?Missing required secret GMAIL_FROM_EMAIL}"
           TO_EMAIL="${GMAIL_TO_EMAIL:-$GMAIL_FROM_EMAIL}"
