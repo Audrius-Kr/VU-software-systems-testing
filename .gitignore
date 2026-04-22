@@ -3,5 +3,8 @@ newman/
 *.log
 .DS_Store
 postman/*local*.json
+postman/Gmail_API.postman_collection.json
+postman/Gmail_API.postman_environment.example.json
+postman/Gmail_API.postman_environment.json
 .env
 .env.*
