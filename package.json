@@ -1,0 +1,14 @@
+{
+  "name": "testavimas-2-services",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:collection": "node scripts/build-postman-collection.mjs",
+    "get-token": "node scripts/get-access-token.mjs",
+    "newman": "newman run postman/Gmail_API.postman_collection.json -e postman/Gmail_API.postman_environment.json --folder \"Exercise_2\"",
+    "newman:all": "newman run postman/Gmail_API.postman_collection.json -e postman/Gmail_API.postman_environment.json"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}
