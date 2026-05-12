@@ -44,13 +44,7 @@
                   "const to = pm.environment.get('to_email') || from;",
                   "if (!from) { throw new Error('Set environment variable from_email'); }",
                   "const runId = pm.collectionVariables.get('runId');",
-                  "const rfc2822 = [",
-                  "  'From: <' + from + '>',",
-                  "  'To: <' + to + '>',",
-                  "  'Subject: Test Email ' + runId,",
-                  "  '',",
-                  "  'Hello world!'",
-                  "].join('\\n');",
+                  "const rfc2822 = 'From: <' + from + '>\r\nTo: <' + to + '>\r\nSubject: Test Email ' + runId + '\r\n\r\nHello world!';",
                   "const utf8Bytes = unescape(encodeURIComponent(rfc2822));",
                   "let bin = '';",
                   "for (let i = 0; i < utf8Bytes.length; i++) { bin += String.fromCharCode(utf8Bytes.charCodeAt(i)); }",
@@ -115,13 +109,7 @@
                   "const to = pm.environment.get('to_email') || from;",
                   "if (!from) { throw new Error('Set environment variable from_email'); }",
                   "const runId = pm.collectionVariables.get('runId');",
-                  "const rfc2822 = [",
-                  "  'From: <' + from + '>',",
-                  "  'To: <' + to + '>',",
-                  "  'Subject: Test Email ' + runId,",
-                  "  '',",
-                  "  'Hello world!'",
-                  "].join('\\n');",
+                  "const rfc2822 = 'From: <' + from + '>\r\nTo: <' + to + '>\r\nSubject: Test Email ' + runId + '\r\n\r\nHello world!';",
                   "const utf8Bytes = unescape(encodeURIComponent(rfc2822));",
                   "let bin = '';",
                   "for (let i = 0; i < utf8Bytes.length; i++) { bin += String.fromCharCode(utf8Bytes.charCodeAt(i)); }",
@@ -191,7 +179,11 @@
                   "  pm.expect(j).to.have.property('id');",
                   "  pm.expect(j.id).to.be.a('string').that.is.not.empty;",
                   "});",
-                  "pm.environment.set('label_id', j.id);"
+                  "pm.environment.set('label_id', j.id);",
+                  "pm.test('message_id is set from previous step', function () {",
+                  "  const mid = pm.environment.get('message_id');",
+                  "  pm.expect(mid).to.be.a('string').that.is.not.empty;",
+                  "});"
                 ]
               }
             }
@@ -228,8 +220,12 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "const j = pm.response.json();",
                   "const lid = pm.environment.get('label_id');",
+                  "const mid03 = pm.environment.get('message_id');",
                   "pm.test('labelIds includes created label', function () {",
                   "  pm.expect(j.labelIds || []).to.include(lid);",
+                  "});",
+                  "pm.test('response id matches message_id', function () {",
+                  "  pm.expect(j.id).to.equal(mid03);",
                   "});"
                 ]
               }
@@ -291,8 +287,12 @@
                 "exec": [
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "const j = pm.response.json();",
+                  "const mid05 = pm.environment.get('message_id');",
                   "pm.test('message has TRASH label', function () {",
                   "  pm.expect(j.labelIds || []).to.include('TRASH');",
+                  "});",
+                  "pm.test('response id matches message_id', function () {",
+                  "  pm.expect(j.id).to.equal(mid05);",
                   "});"
                 ]
               }
@@ -330,6 +330,10 @@
                   "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });",
                   "pm.test('response time under 15s', function () {",
                   "  pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});",
+                  "pm.test('message_id was set throughout the scenario', function () {",
+                  "  const mid = pm.environment.get('message_id');",
+                  "  pm.expect(mid).to.be.a('string').that.is.not.empty;",
                   "});"
                 ]
               }

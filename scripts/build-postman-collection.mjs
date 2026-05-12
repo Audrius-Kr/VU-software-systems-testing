@@ -42,14 +42,22 @@ const testsCreateLabel = [
   "  pm.expect(j.id).to.be.a('string').that.is.not.empty;",
   "});",
   "pm.environment.set('label_id', j.id);",
+  "pm.test('message_id is set from previous step', function () {",
+  "  const mid = pm.environment.get('message_id');",
+  "  pm.expect(mid).to.be.a('string').that.is.not.empty;",
+  "});",
 ];
 
 const testsModify = [
   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
   "const j = pm.response.json();",
   "const lid = pm.environment.get('label_id');",
+  "const mid03 = pm.environment.get('message_id');",
   "pm.test('labelIds includes created label', function () {",
   "  pm.expect(j.labelIds || []).to.include(lid);",
+  "});",
+  "pm.test('response id matches message_id', function () {",
+  "  pm.expect(j.id).to.equal(mid03);",
   "});",
 ];
 
@@ -66,8 +74,12 @@ const testsList = [
 const testsTrash = [
   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
   "const j = pm.response.json();",
+  "const mid05 = pm.environment.get('message_id');",
   "pm.test('message has TRASH label', function () {",
   "  pm.expect(j.labelIds || []).to.include('TRASH');",
+  "});",
+  "pm.test('response id matches message_id', function () {",
+  "  pm.expect(j.id).to.equal(mid05);",
   "});",
 ];
 
@@ -75,6 +87,10 @@ const testsDeleteLabel = [
   "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });",
   "pm.test('response time under 15s', function () {",
   "  pm.expect(pm.response.responseTime).to.be.below(15000);",
+  "});",
+  "pm.test('message_id was set throughout the scenario', function () {",
+  "  const mid = pm.environment.get('message_id');",
+  "  pm.expect(mid).to.be.a('string').that.is.not.empty;",
   "});",
 ];
 
